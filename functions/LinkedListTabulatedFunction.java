@@ -1,9 +1,11 @@
 package functions;
 
-public class LinkedListTabulatedFunction implements TabulatedFunction {
+import java.io.*;
+
+public class LinkedListTabulatedFunction implements TabulatedFunction , Externalizable {
 
     // Внутренний класс для элемента списка
-    private class FunctionNode {
+    private class FunctionNode implements Serializable {
         private FunctionPoint point;
         private FunctionNode prev;
         private FunctionNode next;
@@ -51,6 +53,11 @@ public class LinkedListTabulatedFunction implements TabulatedFunction {
     private FunctionNode lastAccessedNode; // кэш для быстроты доступа
     private int lastAccessedIndex; // индекс последнего доступного элемента
     private int size; // количество значащих элементов
+
+
+    public LinkedListTabulatedFunction() {
+        initializeList();
+    }
 
     // Конструкторы
     public LinkedListTabulatedFunction(double leftX, double rightX, int pointsCount) {
@@ -107,6 +114,30 @@ public class LinkedListTabulatedFunction implements TabulatedFunction {
         }
     }
 
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeInt(size);
+
+        FunctionNode current = head.getNext();
+        for (int i = 0; i < size; i++) {
+            out.writeDouble(current.getPoint().getX());
+            out.writeDouble(current.getPoint().getY());
+            current = current.getNext();
+        }
+    }
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        int pointsCount = in.readInt();
+
+        initializeList();
+
+        for (int i = 0; i < pointsCount; i++) {
+            double x = in.readDouble();
+            double y = in.readDouble();
+            addNodeToTail().setPoint(new FunctionPoint(x, y));
+        }
+    }
 
     // Инициализация пустого списка с головой
     private void initializeList() {
