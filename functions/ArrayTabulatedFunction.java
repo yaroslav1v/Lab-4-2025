@@ -2,7 +2,7 @@ package functions;
 
 import java.io.*;
 
-public class ArrayTabulatedFunction implements TabulatedFunction, Externalizable {
+public class ArrayTabulatedFunction implements TabulatedFunction, Serializable {
 
     private FunctionPoint[] points_arr;
     private int pointslength;
@@ -13,14 +13,7 @@ public class ArrayTabulatedFunction implements TabulatedFunction, Externalizable
 
     public static boolean compareDouble(double a, double b) {
         final double epsilon = 1e-10;
-        double diff = a - b;
-
-        if (diff < -epsilon && diff > epsilon) {
-            return false;
-        }
-        else {
-            return true;
-        }
+        return Math.abs(a - b) < epsilon;
     }
 
     public ArrayTabulatedFunction(double leftX, double rightX, int pointsCount) {
@@ -88,27 +81,6 @@ public class ArrayTabulatedFunction implements TabulatedFunction, Externalizable
         }
     }
 
-    // Методы Externalizable
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeInt(pointslength);
-        for (int i = 0; i < pointslength; i++) {
-            out.writeDouble(points_arr[i].getX());
-            out.writeDouble(points_arr[i].getY());
-        }
-    }
-
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        pointslength = in.readInt();
-        points_arr = new FunctionPoint[pointslength];
-        for (int i = 0; i < pointslength; i++) {
-            double x = in.readDouble();
-            double y = in.readDouble();
-            points_arr[i] = new FunctionPoint(x, y);
-        }
-    }
-
     public double getLeftDomainBorder() {
         return points_arr[0].getX();
     }
@@ -118,11 +90,15 @@ public class ArrayTabulatedFunction implements TabulatedFunction, Externalizable
     }
 
     public double getFunctionValue(double x){
-        double y;
-        int findex=0, sindex=0;
+        // Проверка границ
+        if (x < points_arr[0].getX() || x > points_arr[pointslength-1].getX()) {
+            return Double.NaN;
+        }
 
-        for(int i = 0; i < pointslength-1; i++){
-            if(points_arr[i].getX() <= x && points_arr[i + 1].getX() >= x) {
+        // Поиск интервала, содержащего x
+        for (int i = 0; i < pointslength - 1; i++) {
+            if (points_arr[i].getX() <= x && points_arr[i + 1].getX() >= x) {
+
 
                 if (compareDouble(x, points_arr[i].getX())) {
                     return points_arr[i].getY();
@@ -131,16 +107,17 @@ public class ArrayTabulatedFunction implements TabulatedFunction, Externalizable
                     return points_arr[i + 1].getY();
                 }
 
-                for (int j = 0; j < pointslength - 1; j++) {
-                    if (points_arr[j].getX() <= x && points_arr[j + 1].getX() >= x) {
-                        findex = j;
-                        sindex = j + 1;
-                        j = pointslength - 1;
-                    }
-                }
+
+                double x1 = points_arr[i].getX();
+                double y1 = points_arr[i].getY();
+                double x2 = points_arr[i + 1].getX();
+                double y2 = points_arr[i + 1].getY();
+
+                return y1 + (y2 - y1) * (x - x1) / (x2 - x1);
             }
         }
-        return ((points_arr[findex].getY()) + (points_arr[sindex].getY() - points_arr[findex].getY()) * (x - points_arr[findex].getX()) / (points_arr[sindex].getX() - points_arr[findex].getX()));
+
+        return Double.NaN;
     }
 
     public int getPointsCount(){
@@ -293,3 +270,4 @@ public class ArrayTabulatedFunction implements TabulatedFunction, Externalizable
         pointslength++;
     }
 }
+
