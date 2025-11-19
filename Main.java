@@ -133,5 +133,39 @@ public class Main {
         } catch (IOException | ClassNotFoundException e) {
             System.out.println("Исключение");
         }
+
+
+        System.out.println();
+        System.out.println("Сериализация LinkedListTabulatedFunction");
+        System.out.println();
+
+
+        FunctionPoint[] points = new FunctionPoint[11];
+        for (int i = 0; i < 11; i++) {
+            double x = i; // от 0 до 10
+            double y = Functions.composition(log, ex).getFunctionValue(x);
+            points[i] = new FunctionPoint(x, y);
+        }
+
+        TabulatedFunction linkedListFun = new LinkedListTabulatedFunction(points);
+
+
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("linkedlist.ser"))) {
+            out.writeObject(linkedListFun);
+        } catch (IOException e) {
+            System.out.println("Исключение");
+        }
+
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream("linkedlist.ser"))) {
+            TabulatedFunction linkedListFunDeserialized = (TabulatedFunction) in.readObject();
+            for (int i = 0; i <= 10; i++) {
+                System.out.println("LinkedList (x = " + i + ") = " + linkedListFun.getFunctionValue(i) +
+                        " Deserialized = " + linkedListFunDeserialized.getFunctionValue(i));
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("Исключение");
+        }
+
+
     }
 }
