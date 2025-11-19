@@ -110,5 +110,28 @@ public class Main {
         } catch (IOException | ClassNotFoundException e) {
             System.out.println("Исключение");
         }
+
+        System.out.println();
+        System.out.println("Сериализция через Serializable");
+        System.out.println();
+
+        TabulatedFunction FunSerial = TabulatedFunctions.tabulate(Functions.composition(log, ex), 0, 10, 11);
+
+
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("serializable.ser"))) {
+            out.writeObject(FunSerial);
+        } catch (IOException e) {
+            System.out.println("Исключение");
+        }
+
+
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream("serializable.ser"))) {
+            TabulatedFunction FunSerialDeserialized = (TabulatedFunction) in.readObject();
+            for (int i = 0; i <= 10; i++) {
+                System.out.println("Отезок (x = " + i + ") FunSerial = " + FunSerial.getFunctionValue(i) + " Deserialized = " + FunSerialDeserialized.getFunctionValue(i));
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("Исключение");
+        }
     }
 }
