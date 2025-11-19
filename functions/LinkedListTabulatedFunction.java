@@ -233,10 +233,11 @@ public class LinkedListTabulatedFunction implements TabulatedFunction {
 
             if (node1.getPoint().getX() <= x && node2.getPoint().getX() >= x) {
 
-                if (node1.getPoint().getX() == x) {
+
+                if (TabulatedFunction.compareDouble(node1.getPoint().getX(), x)) {
                     return node1.getPoint().getY();
                 }
-                if (node2.getPoint().getX() == x) {
+                if (TabulatedFunction.compareDouble(node2.getPoint().getX(), x)) {
                     return node2.getPoint().getY();
                 }
 
